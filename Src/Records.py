@@ -43,13 +43,16 @@ def CreateTFRecord(OUTNAME, LIST_DOUBLE):
         annotation = annotation.astype(np.uint8)
         height = img.shape[0]
         width = img.shape[1]
-   
+        height_a = annotation.shape[0]
+        width_a = annotation.shape[1]
         img_raw = img.tostring()
         annotation_raw = annotation.tostring()
       
         example = tf.train.Example(features=tf.train.Features(feature={
-            'height': _int64_feature(height),
-            'width': _int64_feature(width),
+            'height_img': _int64_feature(height),
+            'width_img': _int64_feature(width),
+            'height_mask': _int64_feature(height_a),
+            'width_mask': _int64_feature(width_a),
             'image_raw': _bytes_feature(img_raw),
             'mask_raw': _bytes_feature(annotation_raw)}))
       
@@ -91,4 +94,4 @@ if __name__ == '__main__':
     ind_test = np.random.choice(len(list_data), size=args.test_size, replace=False)
     ind_train = np.array([i for i in range(len(list_data)) if i not in ind_test])
     CreateTFRecord(args.output_train, list(np.array(list_data)[ind_train]))
-    CreateTFRecord(args.output_test , list(np.array(list_data)[ind_train]))
+    CreateTFRecord(args.output_test , list(np.array(list_data)[ind_test]))
