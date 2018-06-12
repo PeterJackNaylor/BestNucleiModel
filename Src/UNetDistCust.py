@@ -135,7 +135,7 @@ class DNNDist(UNetDist):
                          self.train_prediction, self.train_labels_node,
                          self.merged_summary])
 
-            if step % self.N_PRINT == 0:# and step != 0:
+            if step % self.N_PRINT == 0 and step != 0:
                 pred = np.zeros(shape=(test_steps, self.IMAGE_SIZE[0], self.IMAGE_SIZE[1]), dtype='float')
                 lab  = np.zeros(shape=(test_steps, self.IMAGE_SIZE[0], self.IMAGE_SIZE[1]), dtype='float')
                 loss = np.zeros(test_steps, dtype='float')
@@ -209,7 +209,7 @@ if __name__ == '__main__':
     n_train = GetRecordSize(args.train_record)
     n_test  = GetRecordSize(args.test_record)
 
-    NUMBER_OF_STEPS_FOR_ONE_EPOCH = 10#n_train // args.batch_size
+    NUMBER_OF_STEPS_FOR_ONE_EPOCH = n_train // args.batch_size
     NUMBER_OF_STEPS = NUMBER_OF_STEPS_FOR_ONE_EPOCH * args.epochs
     model = DNNDist(args.train_record,
                     args.test_record,
