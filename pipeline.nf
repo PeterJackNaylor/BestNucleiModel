@@ -47,5 +47,17 @@ process Training {
 	"""
 	python $DISTANCE_TRAIN --log ${lr}__${wd}__${nf} --learning_rate $lr --weight_decay $wd --n_features $nf --epochs $EPOCHS --batch_size $BS --train_record $train --test_record $test --mean_file $mean
 	"""
+}
 
+FINAL_SCRIPT = file("Src/final_script.py")
+
+process GiveBest {
+    pusblishDir "./best_model"
+    input:
+    file _ from LOGS .collect()
+    output:
+    file "best"
+    """
+    python $FINAL_SCRIPT
+    """
 }
