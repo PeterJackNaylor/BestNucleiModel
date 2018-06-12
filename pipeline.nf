@@ -34,7 +34,7 @@ process MeanFile {
 DISTANCE_TRAIN = file("Src/UNetDistCust.py")
 BS = 16
 EPOCHS = 80
-LEARNING_RATE = [0.01, 0.001, 0.001]
+LEARNING_RATE = [0.01, 0.001, 0.0001]
 WEGIHT_DECAYS = [0.0005, 0.00005, 0.000005]
 NFEATURES = [16, 32, 64]
 
@@ -49,8 +49,8 @@ process Training {
 	output:
 	file "${lr}__${wd}__${nf}" into LOGS
 	"""
-        export CUDA_VISIBLE_DEVICES=0
-        source $HOME/init_gpu
+    export CUDA_VISIBLE_DEVICES=0
+    source $HOME/init_gpu
 	python $DISTANCE_TRAIN --log ${lr}__${wd}__${nf} --learning_rate $lr --weight_decay $wd --n_features $nf --epochs $EPOCHS --batch_size $BS --train_record $train --test_record $test --mean_file $mean
 	"""
 }
