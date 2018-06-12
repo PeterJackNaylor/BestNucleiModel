@@ -6,6 +6,7 @@ DATA2 = file('../Data/ForDataGenTrainTestVal')
 
 
 process CreateRecord {
+    queue "gpu-cbio"
     input:
     file tnbc from DATA1
     file neeraj from DATA2
@@ -20,6 +21,7 @@ process CreateRecord {
 COMPUTE_MEAN = file("Src/ComputeMean.py")
 
 process MeanFile {
+        queue "gpu-cbio"
 	input:
 	set file(train), file(test) from RECORD
 	output:
@@ -37,6 +39,8 @@ WEGIHT_DECAYS = [0.0005, 0.00005, 0.000005]
 NFEATURES = [16, 32, 64]
 
 process Training {
+        tag { "Training ${lr}__${wd}__${nf}" }
+        queue "gpu-cbio"
 	input:
 	set file(train), file(test), file(mean) from TRAIN_TEST_MEAN
 	each lr from LEARNING_RATE
@@ -45,6 +49,8 @@ process Training {
 	output:
 	file "${lr}__${wd}__${nf}" into LOGS
 	"""
+        export CUDA_VISIBLE_DEVICES=0
+        source $HOME/init_gpu
 	python $DISTANCE_TRAIN --log ${lr}__${wd}__${nf} --learning_rate $lr --weight_decay $wd --n_features $nf --epochs $EPOCHS --batch_size $BS --train_record $train --test_record $test --mean_file $mean
 	"""
 

@@ -14,7 +14,6 @@ import pdb
 import matplotlib.pylab as plt
 import time
 from joblib import Parallel, delayed
-import FIMM_histo.deconvolution as deconv
 from ImageTransform import flip_horizontal, flip_vertical
 from utils import generate_wsl
 
@@ -25,25 +24,6 @@ def LoadImageBatch(path, img_format):
     image = misc.imread(path)
     if image.shape[2] == 4:
         image = image[:, :, 0:3]
-
-    if img_format == "HEDab":
-        dec = deconv.Deconvolution()
-        dec.params['image_type'] = 'HEDab'
-
-        np_img = np.array(image)
-        dec_img = dec.colorDeconv(np_img[:, :, :3])
-
-        image = dec_img.astype('uint8')
-
-    elif img_format == "HE":
-        dec = deconv.Deconvolution()
-        dec.params['image_type'] = 'HEDab'
-
-        np_img = np.array(image)
-        dec_img = dec.colorDeconv(np_img[:, :, :3])
-
-        image = dec_img.astype('uint8')
-
     return image
 
 def OpenReadProcess(img_p, lbl_p, DG, f, crop_n):
@@ -248,25 +228,6 @@ class DataGen(object):
         image = misc.imread(path)
         if image.shape[2] == 4:
             image = image[:, :, 0:3]
-
-        if self.img_format == "HEDab":
-            dec = deconv.Deconvolution()
-            dec.params['image_type'] = 'HEDab'
-
-            np_img = np.array(image)
-            dec_img = dec.colorDeconv(np_img[:, :, :3])
-
-            image = dec_img.astype('uint8')
-
-        elif self.img_format == "HE":
-            dec = deconv.Deconvolution()
-            dec.params['image_type'] = 'HEDab'
-
-            np_img = np.array(image)
-            dec_img = dec.colorDeconv(np_img[:, :, :3])
-
-            image = dec_img.astype('uint8')
-
         return image
 
 
