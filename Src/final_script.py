@@ -13,7 +13,7 @@ if __name__ == '__main__':
     files = glob("*/data_collector.csv")
     for f in files:
         score = GetScore(f)
-        res += [(score, f.split('/'))]
+        res += [(score, f.split('/')[0])]
     sorted_res = sorted(res, key=lambda x: x[0])
     best_model = sorted_res[0]
     os.mkdir("best")
