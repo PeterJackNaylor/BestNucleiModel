@@ -7,7 +7,6 @@ from skimage.transform import PiecewiseAffineTransform, warp
 from skimage import img_as_ubyte
 from scipy.ndimage.interpolation import map_coordinates
 from scipy.ndimage.filters import gaussian_filter
-import FIMM_histo.deconvolution as deconv
 from skimage import color
 from scipy.misc import imsave
 
@@ -390,106 +389,6 @@ def GreyValuePerturbation(image, k, b, MIN=0, MAX=255):
     return image
 
 
-class HE_Perturbation(Transf):
-    """
-    Transforms image in H/E, perfoms grey value variation on
-    this subset and then transforms it back.
-    WITH THOMAS RGB -> HE
-    """
-    def __init__(self, ch1, ch2, ch3 = (1,0)):
-        k1, b1 = ch1
-        k2, b2 = ch2
-        k3, b3 = ch3
-        Transf.__init__(self, "HE_Perturbation_Thomas_" + str(k1) +
-                        "_" + str(b1) + "_" + str(k2) +
-                        "_" + str(b2) + "_" + str(k3) +
-                        "_" + str(b3) )
-        k = [k1, k2, k3]
-        b = [b1, b2, b3]
-        self.params = {"k": k,
-                       "b": b}
-    def _apply_(self, *image):
-        res = ()
-        n_img = 0
-        for img in image:
-            if n_img == 0:
-                ### transform image into HE
-                dec = deconv.Deconvolution()
-                dec.params['image_type'] = 'HEDab'
-
-                np_img = np.array(img)
-                dec_img = dec.colorDeconv(np_img)
-                #pdb.set_trace()
-                dec_img = dec_img.astype('uint8')
-                ### perturbe each channel H, E, Dab
-                for i in range(3):
-                    k_i = self.params['k'][i]
-                    b_i = self.params['b'][i]
-                    val = np.max(dec_img[:,:,i])
-                    dec_img[:,:,i] = GreyValuePerturbation(dec_img[:, :, i], k_i, b_i, 
-                               MIN=0,
-                               MAX=255)
-                    val -= np.max(dec_img[:,:,i])
-                    dec_img[:,:,i] += val
-                sub_res = dec.colorDeconvHE(dec_img).astype('uint8')
-
-                ### Have to implement deconvolution of the deconvolution
-
-
-            else:
-                sub_res = img
-
-            res += (sub_res,)
-            n_img += 1
-        return res
-
-
-
-class HE_Perturbation2(Transf):
-    """
-    Transforms image in H/E, perfoms grey value variation on
-    this subset and then transforms it back. 1 is made with
-    Thomas' rgb to he whereas this one is made with the one 
-    from skimage.
-    """
-    def __init__(self, ch1, ch2, ch3 = (1,0)):
-        k1, b1 = ch1
-        k2, b2 = ch2
-        k3, b3 = ch3
-        Transf.__init__(self, "HE_Perturbation_" + str(k1) +
-                        "_" + str(b1) + "_" + str(k2) +
-                        "_" + str(b2) + "_" + str(k3) +
-                        "_" + str(b3) )
-        k = [k1, k2, k3]
-        b = [b1, b2, b3]
-        self.params = {"k": k,
-                       "b": b}
-    def _apply_(self, *image):
-        res = ()
-        n_img = 0
-        for img in image:
-            if n_img == 0:
-
-                dec_img = color.rgb2hed(img)
-                ### perturbe each channel H, E, Dab
-                for i in range(3):
-                    k_i = self.params['k'][i]
-                    b_i = self.params['b'][i]
-                    dec_img[:,:,i] = GreyValuePerturbation(dec_img[:, :, i], k_i, b_i)
-                sub_res = color.hed2rgb(dec_img).astype('uint8')
-
-                ### Have to implement deconvolution of the deconvolution
-
-
-            else:
-                sub_res = img
-
-            res += (sub_res,)
-            n_img += 1
-        return res
-
-
-
 class HSV_Perturbation(Transf):
     """
     Transforms image in H/E, perfoms grey value variation on
@@ -547,11 +446,6 @@ def ListTransform(n_rot=4, n_elastic=50, n_he=50, n_hsv = 50,
     for i in range(n_elastic):
         transform_list.append(ElasticDeformation(var_elast[0], var_elast[1], var_elast[2]))
 
-    k_h = np.random.normal(1.,var_he[0], n_he)
-    k_e = np.random.normal(1.,var_he[1], n_he)
-
-    for i in range(n_he):
-        transform_list.append(HE_Perturbation((k_h[i],0), (k_e[i],0), (1, 0)))
 
 
     k_s = np.random.normal(1.,var_hsv[0], n_hsv)
