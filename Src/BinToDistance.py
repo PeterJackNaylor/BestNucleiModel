@@ -2,7 +2,7 @@ from skimage.io import imread, imsave
 from glob import glob
 from os.path import dirname, join, basename
 from shutil import copy
-from utils import CheckOrCreate
+import os
 from scipy.ndimage.morphology import distance_transform_cdt
 import numpy as np
 import sys
@@ -22,7 +22,7 @@ def DistanceWithoutNormalise(bin_image):
     return res
 
 NEW_FOLDER = sys.argv[2]
-CheckOrCreate(NEW_FOLDER)
+os.mkdir(NEW_FOLDER)
 
 for image in glob('{}/Slide_*/*.png'.format(sys.argv[1])):
     baseN = basename(image)
