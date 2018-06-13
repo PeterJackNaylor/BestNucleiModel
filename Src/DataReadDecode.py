@@ -254,9 +254,10 @@ def RandomElasticDeformation(image, annotation, p,
 
 def augment(image_f, annotation_f, channels=3):
     with tf.name_scope("DataAugmentation"):
+        # Blur and ElasticDeformation are very slow..
         image_f, annotation_f = RandomFlip(image_f, annotation_f, 0.5)    
         image_f, annotation_f = RandomRotate(image_f, annotation_f, 0.2)  
-        image_f, annotation_f = RandomBlur(image_f, annotation_f, 0.2, channels)
+        #image_f, annotation_f = RandomBlur(image_f, annotation_f, 0.2, channels)
         image_f, annotation_f = RandomBrightness(image_f, annotation_f, 0.2, channels)
         #image_f, annotation_f = RandomElasticDeformation(image_f, annotation_f, 0.5, 0.06, 0.12, 1.1)
         return image_f, annotation_f
@@ -296,6 +297,7 @@ def _parse_function(example_proto, channels=3, HEIGHT=212, WIDTH=212, UNET_x=184
     image_f = tf.cast(image, tf.float32)
     annotation_f = tf.cast(annotation, tf.float32)
     if AUGMENT:
+        annotation_f = expend(annotation_f, 92)
         img_a, lab_a = augment(image_f, annotation_f, channels)
         lab_a = lab_a[92:-92, 92:-92]
     else:
@@ -320,8 +322,8 @@ def read_and_decode(filename_queue, IMAGE_HEIGHT, IMAGE_WIDTH,
         dataset = dataset.map(f_parse,  num_parallel_calls=N_THREADS)
     else:
         dataset = dataset.map(Not_f_parse,  num_parallel_calls=N_THREADS)
-    dataset = dataset.prefetch(buffer_size=buffers / 100) 
-    dataset = dataset.shuffle(buffer_size=buffers)
+    dataset = dataset.prefetch(buffer_size=buffers) 
+    dataset = dataset.shuffle(buffer_size=buffers / 100)
     dataset = dataset.batch(BATCH_SIZE)
     dataset = dataset.repeat(100)
     iterator = dataset.make_one_shot_iterator()

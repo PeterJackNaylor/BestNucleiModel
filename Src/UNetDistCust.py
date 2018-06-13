@@ -61,18 +61,20 @@ class DNNDist(UNetDist):
         New queues for coordinator
         """
         with tf.device('/cpu:0'):
-            self.data_init, self.train_iterator = read_and_decode(train, 
-                                                          self.IMAGE_SIZE[0], 
-                                                          self.IMAGE_SIZE[1],
-                                                          self.BATCH_SIZE,
-                                                          self.N_THREADS)
+            with tf.name_scope('Training_queue'):
+                self.data_init, self.train_iterator = read_and_decode(train, 
+                                                              self.IMAGE_SIZE[0], 
+                                                              self.IMAGE_SIZE[1],
+                                                              self.BATCH_SIZE,
+                                                              self.N_THREADS)
+            with tf.name_scope('Test_queue'):
 
-            self.data_init_test, self.test_iterator = read_and_decode(test, 
-                                                          self.IMAGE_SIZE[0], 
-                                                          self.IMAGE_SIZE[1],
-                                                          1,
-                                                          self.N_THREADS,
-                                                          TRAIN=False)
+                self.data_init_test, self.test_iterator = read_and_decode(test, 
+                                                              self.IMAGE_SIZE[0], 
+                                                              self.IMAGE_SIZE[1],
+                                                              1,
+                                                              self.N_THREADS,
+                                                              TRAIN=False)
         print("Queue initialized")
 
     def input_node_f(self):
@@ -88,7 +90,8 @@ class DNNDist(UNetDist):
             test_images, test_labels = self.test_iterator.get_next()
             return test_images, test_labels
 
-        self.image, self.annotation = tf.cond(self.is_training, f_true, f_false)
+        with tf.name_scope('Switch'):
+            self.image, self.annotation = tf.cond(self.is_training, f_true, f_false)
 
         if self.SUB_MEAN:
             self.images_queue = self.image - self.MEAN_ARRAY
@@ -128,7 +131,7 @@ class DNNDist(UNetDist):
         print "self.global step", int(self.global_step.eval())
         begin = int(self.global_step.eval())
         print "begin", begin
-        for step in trange(begin, steps + begin):  
+        for step in trange(begin, steps + begin, desc='Training'):  
             # self.optimizer is replaced by self.training_op for the exponential moving decay
             _, l, lr, predictions, batch_labels, s = self.sess.run(
                         [self.training_op, self.loss, self.learning_rate,
@@ -139,7 +142,7 @@ class DNNDist(UNetDist):
                 pred = np.zeros(shape=(test_steps, self.IMAGE_SIZE[0], self.IMAGE_SIZE[1]), dtype='float')
                 lab  = np.zeros(shape=(test_steps, self.IMAGE_SIZE[0], self.IMAGE_SIZE[1]), dtype='float')
                 loss = np.zeros(test_steps, dtype='float')
-                for sub_step in range(test_steps):
+                for sub_step in trange(test_steps, desc='Testing', leave=True):
                     l, tpredictions, batch_labels = self.sess.run([self.loss, self.train_prediction, 
                                                                    self.train_labels_node], feed_dict={self.is_training:False})
                     pred[sub_step] = tpredictions[0,:,:]

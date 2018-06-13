@@ -11,3 +11,5 @@ unzip ForDataGenTrainTestVal.zip -d ForDataGenTrainTestVal && \
 mv ForDataGenTrainTestVal/ForDataGenTrainTestVal ../Data/ && \
 rm -r ForDataGenTrainTestVal && \
 rm ForDataGenTrainTestVal.zip
+rm -r ../Data/ForDataGenTrainTestVal/Slide_test
+rm -r ../Data/ForDataGenTrainTestVal/GT_test
