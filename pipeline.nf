@@ -22,8 +22,8 @@ process BinToDistance {
 process CreateRecord {
     queue "gpu-cbio"
     input:
-    file tnbc from DATA1
-    file neeraj from DATA2
+    file tnbc from DIST1
+    file neeraj from DIST2
     output:
     set file("train.tfrecord"), file("test.tfrecord") into RECORD
     """
