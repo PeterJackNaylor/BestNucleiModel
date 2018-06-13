@@ -138,19 +138,20 @@ class DNNDist(UNetDist):
                          self.train_prediction, self.train_labels_node,
                          self.merged_summary])
 
-            if step % self.N_PRINT == 0 and step != 0:
+            if step % self.N_PRINT == 0 and step != begin:
                 pred = np.zeros(shape=(test_steps, self.IMAGE_SIZE[0], self.IMAGE_SIZE[1]), dtype='float')
                 lab  = np.zeros(shape=(test_steps, self.IMAGE_SIZE[0], self.IMAGE_SIZE[1]), dtype='float')
                 loss = np.zeros(test_steps, dtype='float')
                 for sub_step in trange(test_steps, desc='Testing', leave=True):
-                    l, tpredictions, batch_labels = self.sess.run([self.loss, self.train_prediction, 
-                                                                   self.train_labels_node], feed_dict={self.is_training:False})
+                    l, tpredictions, batch_labels, s_test = self.sess.run([self.loss, self.train_prediction, 
+                                                                   self.train_labels_node, self.merged_summary], feed_dict={self.is_training:False})
                     pred[sub_step] = tpredictions[0,:,:]
                     lab[sub_step]  = batch_labels[0,:,:,0]
                     loss[sub_step] = l
                 i = datetime.now()
                 tqdm.write(i.strftime('%Y/%m/%d %H:%M:%S: \n '))
-                self.summary_writer.add_summary(s, step)                
+                self.summary_writer.add_summary(s, step)
+                self.summary_test_writer.add_summary(s_test, step)                
                 tqdm.write('  Step %d of %d' % (step, steps))
                 tqdm.write('  Learning rate: {} \n'.format(lr))
                 tqdm.write('  Mini-batch loss: {} \n '.format(l))
