@@ -46,4 +46,4 @@ for image in glob('{}/Slide_*/*.png'.format(sys.argv[1])):
     copy(image, join(NEW_FOLDER, Slide_N, baseN))
     bin_image = LoadGT(join(OLD_FOLDER, GT_N, GT_name))
     res = DistanceWithoutNormalise(bin_image)
-imsave(join(NEW_FOLDER, GT_N, GT_name), res)
+    imsave(join(NEW_FOLDER, GT_N, GT_name), res)
