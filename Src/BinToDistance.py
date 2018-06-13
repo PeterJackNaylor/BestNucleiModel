@@ -21,8 +21,16 @@ def DistanceWithoutNormalise(bin_image):
     res = res.astype('uint8')
     return res
 
+def CheckOrCreate(path):
+    """
+    If path exists, does nothing otherwise it creates it.
+    """
+    if not os.path.isdir(path):
+        os.makedirs(path)
+
+
 NEW_FOLDER = sys.argv[2]
-os.mkdir(NEW_FOLDER)
+CheckOrCreate(NEW_FOLDER)
 
 for image in glob('{}/Slide_*/*.png'.format(sys.argv[1])):
     baseN = basename(image)
