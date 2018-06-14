@@ -3,20 +3,33 @@ TFRECORD = file('Src/Records.py')
 DATA1 = file('../Data/TNBC_NucleiSegmentation')
 DATA2 = file('../Data/ForDataGenTrainTestVal')
 
+BTD = file('Src/BinToDistance.py')
 
-
-process CreateRecord {
+process BinToDistance {
     queue "gpu-cbio"
     input:
     file tnbc from DATA1
     file neeraj from DATA2
+    output:
+    file "tnbc_dist" into DIST1
+    file "neeraj_dist" into DIST2
+    """
+    python $BTD $tnbc tnbc_dist
+    python $BTD $neeraj neeraj_dist
+    """
+}
+
+process CreateRecord {
+    queue "gpu-cbio"
+    input:
+    file tnbc from DIST1
+    file neeraj from DIST2
     output:
     set file("train.tfrecord"), file("test.tfrecord") into RECORD
     """
     python $TFRECORD --test_size 10 --data1 $tnbc --data2 $neeraj --output_train train.tfrecord --output_test test.tfrecord
     """
 }
-
 
 COMPUTE_MEAN = file("Src/ComputeMean.py")
 
