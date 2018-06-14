@@ -151,21 +151,23 @@ class DNNDist(UNetDist):
                 i = datetime.now()
                 tqdm.write(i.strftime('%Y/%m/%d %H:%M:%S: \n '))
                 self.summary_writer.add_summary(s, step)
-                self.summary_test_writer.add_summary(s_test, step)                
+                self.summary_test_writer.add_summary(s_test, step)
+                F1 = self.Validation(pred, lab)                
                 tqdm.write('  Step %d of %d' % (step, steps))
                 tqdm.write('  Learning rate: {} \n'.format(lr))
                 tqdm.write('  Mini-batch loss: {} \n '.format(l))
                 tqdm.write('  Max value: {} \n '.format(np.max(pred)))
+                tqdm.write('  F1 score: {} \n'.format(F1))
                 self.saver.save(self.sess, self.LOG + '/' + "model.ckpt", step)
                 wgt_path = self.LOG + '/' + "model.ckpt-{}".format(step)
-                values_test = [np.mean(loss), self.Validation(pred, lab), wgt_path]
+                values_test = [np.mean(loss), F1, wgt_path]
                 names_test = ["Loss", "F1", "wgt_path"]
                 if early_stop.DataCollectorStopper(values_test, names_test, step):
                     break
         early_stop.save(log=self.LOG)        
     def Validation(self, _pred, _lab):
-        _pred[_pred < 0] = 0
-        _pred[_pred > 0] = 1
+        _pred[_pred < 0.5] = 0
+        _pred[_pred > 0.5] = 1
         _lab[_lab > 0] = 1
         return f1_score(_pred.flatten(), _lab.flatten())
 
