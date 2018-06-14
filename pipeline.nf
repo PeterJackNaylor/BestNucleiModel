@@ -3,13 +3,39 @@ TFRECORD = file('Src/Records.py')
 DATA1 = file('../Data/TNBC_NucleiSegmentation')
 DATA2 = file('../Data/ForDataGenTrainTestVal')
 
+params.normalize = 0
+
+if (params.normalize == 0){
+    
+    NDATA1 = DATA1
+    NDATA2 = DATA2
+
+} else {
+
+    NTN = file("Src/NormalToNormalize.py")
+
+    process Normalize {
+        queue "gpu-cbio"
+        input:
+        file tnbc from DATA1
+        file neeraj from DATA2
+        output:
+        file "tnbc_norm" into NDATA1
+        file "neeraj_norm" into NDATA2
+        """
+        python $NTN $tnbc tnbc_norm $tnbc/Slide_08/08_1.png
+        python $NTN $neeraj neeraj_norm $tnbc/Slide_08/08_1.png
+        """
+    }
+}
+
 BTD = file('Src/BinToDistance.py')
 
 process BinToDistance {
     queue "gpu-cbio"
     input:
-    file tnbc from DATA1
-    file neeraj from DATA2
+    file tnbc from NDATA1
+    file neeraj from NDATA2
     output:
     file "tnbc_dist" into DIST1
     file "neeraj_dist" into DIST2
