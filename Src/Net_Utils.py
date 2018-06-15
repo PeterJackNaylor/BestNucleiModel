@@ -46,5 +46,6 @@ class EarlyStopper(object):
             self.saver.restore(self.sess, best_wgt)
             self.saver.save(self.sess, self.log + '/' + "model.ckpt", step + 1000)
             self.EARLY_STOP = True
+            self.DataCollector.to_csv(self.output_name)
         return self.EARLY_STOP
 
