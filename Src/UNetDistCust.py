@@ -169,7 +169,8 @@ class DNNDist(UNetDist):
         _pred[_pred < 0.5] = 0
         _pred[_pred > 0.5] = 1
         _lab[_lab > 0] = 1
-        return f1_score(_pred.flatten(), _lab.flatten())
+        _lab[_lab < 0] = 0
+        return f1_score(_pred.astype(int).flatten(), _lab.astype(int).flatten())
 
 def GetOptions():
     import argparse
