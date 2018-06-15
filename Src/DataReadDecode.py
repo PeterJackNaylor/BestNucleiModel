@@ -247,7 +247,6 @@ def RandomElasticDeformation(image, annotation, p,
                              next=50):
     with tf.name_scope("RandomElasticDeformation"):
         coin_ela = coin_flip(p)
-        #image = tf.Print(image, [tf.shape(image), tf.shape(annotation)], 'shape of image:')
         image, annotation = tf.cond(coin_ela, lambda: ElasticDeformation(image, annotation, alpha, alpha_affine, sigma, next)
                                             , lambda: Identity(image, annotation))
         return image, annotation
@@ -263,7 +262,7 @@ def augment(image_f, annotation_f, channels=3):
         return image_f, annotation_f
 
 
-def _parse_function(example_proto, channels=3, HEIGHT=212, WIDTH=212, UNET_x=184, AUGMENT=True):
+def _parse_function(example_proto, channels=3, HEIGHT=212, WIDTH=212, UNET=True, AUGMENT=True):
     dic_features={  'height_img': tf.FixedLenFeature([], tf.int64),
                 'width_img': tf.FixedLenFeature([], tf.int64),
                 'height_mask': tf.FixedLenFeature([], tf.int64),
@@ -278,8 +277,8 @@ def _parse_function(example_proto, channels=3, HEIGHT=212, WIDTH=212, UNET_x=184
     height_mask = tf.cast(features['height_mask'], tf.int32)
     width_mask = tf.cast(features['width_mask'], tf.int32)
 
-    const_IMG_HEIGHT = HEIGHT + UNET_x
-    const_IMG_WIDTH = WIDTH + UNET_x
+    const_IMG_HEIGHT = HEIGHT + 184 if UNET else HEIGHT
+    const_IMG_WIDTH = WIDTH + 184 if UNET else WIDTH
 
     const_MASK_HEIGHT = HEIGHT
     const_MASK_WIDTH = WIDTH
@@ -296,10 +295,12 @@ def _parse_function(example_proto, channels=3, HEIGHT=212, WIDTH=212, UNET_x=184
 
     image_f = tf.cast(image, tf.float32)
     annotation_f = tf.cast(annotation, tf.float32)
-    if AUGMENT:
+    if AUGMENT and UNET:
         annotation_f = expend(annotation_f, 92)
         img_a, lab_a = augment(image_f, annotation_f, channels)
         lab_a = lab_a[92:-92, 92:-92]
+    elif AUGMENT:
+        img_a, lab_a = augment(image_f, annotation_f, channels)
     else:
         img_a, lab_a = image_f, annotation_f
     img_a = tf.image.resize_image_with_crop_or_pad(image=img_a,
@@ -312,12 +313,16 @@ def _parse_function(example_proto, channels=3, HEIGHT=212, WIDTH=212, UNET_x=184
     return img_a, lab_a
 
 def read_and_decode(filename_queue, IMAGE_HEIGHT, IMAGE_WIDTH,
-                    BATCH_SIZE, N_THREADS, TRAIN=True, CHANNELS=3, buffers=2000):
+                    BATCH_SIZE, N_THREADS, TRAIN=True, CHANNELS=3, 
+                    UNET=True, buffers=2000):
     dataset = tf.data.TFRecordDataset(filename_queue)
     def f_parse(x):
-        return _parse_function(x, CHANNELS, IMAGE_HEIGHT, IMAGE_WIDTH)
+        return _parse_function(x, CHANNELS, IMAGE_HEIGHT,
+                                  IMAGE_WIDTH, UNET=UNET)
     def Not_f_parse(x):
-        return _parse_function(x, CHANNELS, IMAGE_HEIGHT, IMAGE_WIDTH, AUGMENT=False)
+        return _parse_function(x, CHANNELS, IMAGE_HEIGHT, 
+                               IMAGE_WIDTH, AUGMENT=False, 
+                               UNET=UNET)
     if TRAIN:
         dataset = dataset.map(f_parse,  num_parallel_calls=N_THREADS)
     else:
