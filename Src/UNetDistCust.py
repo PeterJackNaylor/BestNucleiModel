@@ -1,5 +1,5 @@
 from SegNetsTF import UNetDist
-from SegNetsTF.Net_Utils import EarlyStopper
+from Net_Utils import EarlyStopper
 import numpy as np
 from sklearn.metrics import f1_score
 import tensorflow as tf
@@ -107,7 +107,7 @@ class DNNDist(UNetDist):
         track = "F1"
         output = os.path.join(self.LOG, "data_collector.csv")
         look_behind = self.early_stopping_max
-        early_stop = EarlyStopper(track, output, maximum=look_behind)
+        early_stop = EarlyStopper(track, output, self.saver, self.sess, self.LOG, maximum=look_behind)
 
         epoch = self.STEPS * self.BATCH_SIZE // self.N_EPOCH
         self.Saver()
@@ -164,7 +164,7 @@ class DNNDist(UNetDist):
                 names_test = ["Loss", "F1", "wgt_path"]
                 if early_stop.DataCollectorStopper(values_test, names_test, step):
                     break
-        early_stop.save(log=self.LOG)        
+
     def Validation(self, _pred, _lab):
         _pred[_pred < 0.5] = 0
         _pred[_pred > 0.5] = 1
