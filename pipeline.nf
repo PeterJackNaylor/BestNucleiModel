@@ -58,6 +58,7 @@ NFEATURES = [16, 32, 64]
 
 process Training {
     tag { "Training ${lr}__${wd}__${nf}" }
+    clusterOptions "--gres=gpu:1"
     queue "gpu-cbio"
 	input:
 	set file(train), file(test), file(mean) from TRAIN_TEST_MEAN
@@ -84,6 +85,7 @@ process GiveBest {
     file _ from LOGS .collect()
     output:
     file "best"
+    file "recap.csv"
     """
     python $FINAL_SCRIPT
     """
