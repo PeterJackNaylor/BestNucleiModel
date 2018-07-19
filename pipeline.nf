@@ -19,7 +19,6 @@ if (params.normalize == 0){
 
     process Normalize {
         queue "gpu-cbio"
-        beforeScript "export PYTHONPATH=$HOME/packages_py2/StainTools:$PYTHONPATH"
         input:
         file tnbc from DATA1
         file neeraj from DATA2

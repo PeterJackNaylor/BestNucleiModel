@@ -1,3 +1,5 @@
+
+from numpy import load
 from segmentation_net import DistanceUnet
 
 def GetOptions():
@@ -62,7 +64,7 @@ def main():
         'batch_size' : args.batch_size, # batch size for the
         'decay_ema' : 0.9999, #
         'k' : 0.96, # exponential decay factor
-        'mean_array': args.mean_file,
+        'mean_array': load(args.mean_file),
         'n_epochs': args.epochs, # number of epochs
         'early_stopping' : 10, # when to stop training, 20 epochs of non progression
         'save_weights' : True, # if to store as final weights the best thanks to early stopping
