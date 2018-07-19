@@ -1,26 +1,24 @@
+import sys
+
 from skimage.io import imread, imsave
 from glob import glob
 from os.path import dirname, join, basename
 from shutil import copy
 import os
-import numpy as np
-import sys
-from utils import visual_utils as vu
-from normalization.reinhard import ReinhardNormalizer
-from normalization.macenko import MacenkoNormalizer
-from normalization.vahadane import VahadaneNormalizer
+from staintools.utils.visual import read_image
+from staintools import ReinhardNormalizer, MacenkoNormalizer, VahadaneNormalizer
 
 
 def PrepNormalizer(normalization, targetPath):
-    if "Reinhard" in normalization:
+    if "Reinhard" == normalization:
         n = ReinhardNormalizer()
-    elif "Macenko" in normalization:
+    elif "Macenko" == normalization:
         n = MacenkoNormalizer()
-    elif "Vahadane":
+    elif "Vahadane" == normalization:
         n = VahadaneNormalizer()
     else:
         print("No knowned normalization given..")
-    targetImg = vu.read_image(targetPath)
+    targetImg = read_image(targetPath)
     n.fit(targetImg)
     return n
 

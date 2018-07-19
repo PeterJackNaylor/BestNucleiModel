@@ -1,7 +1,9 @@
 
 TFRECORD = file('Src/Records.py')
-DATA1 = file('../Data/TNBC_NucleiSegmentation')
-DATA2 = file('../Data/ForDataGenTrainTestVal')
+DATA1 = file('Data/TNBC_NucleiSegmentation')
+DATA2 = file('Data/ForDataGenTrainTestVal')
+
+TEST_DATA = file('Data/PickedForTest')
 
 params.normalize = 0
 
@@ -9,6 +11,7 @@ if (params.normalize == 0){
     
     NDATA1 = DATA1
     NDATA2 = DATA2
+    NDATA = TEST_DATA
 
 } else {
 
@@ -20,55 +23,30 @@ if (params.normalize == 0){
         input:
         file tnbc from DATA1
         file neeraj from DATA2
+        file test from TEST_DATA
         output:
         file "tnbc_norm" into NDATA1
         file "neeraj_norm" into NDATA2
+        file "test_norm" into NDATA
         """
         python $NTN $tnbc tnbc_norm $tnbc/Slide_08/08_1.png
         python $NTN $neeraj neeraj_norm $tnbc/Slide_08/08_1.png
+        python $NTN $test test_norm $tnbc/Slide_08/08_1.png
         """
     }
 }
 
-BTD = file('Src/BinToDistance.py')
-
-process BinToDistance {
+process Create_Record_Mean {
     queue "gpu-cbio"
     input:
     file tnbc from NDATA1
     file neeraj from NDATA2
+    file test from NDATA
     output:
-    file "tnbc_dist" into DIST1
-    file "neeraj_dist" into DIST2
+    set file("train.tfrecord"), file("test.tfrecord"), file("mean_array.npy") into TRAIN_TEST_MEAN
     """
-    python $BTD $tnbc tnbc_dist
-    python $BTD $neeraj neeraj_dist
+    python $TFRECORD --data1 $tnbc --data2 $neeraj --test $test --output_train train.tfrecord --output_test test.tfrecord --output_mean_array mean_array.npy
     """
-}
-
-process CreateRecord {
-    queue "gpu-cbio"
-    input:
-    file tnbc from DIST1
-    file neeraj from DIST2
-    output:
-    set file("train.tfrecord"), file("test.tfrecord") into RECORD
-    """
-    python $TFRECORD --test_size 10 --data1 $tnbc --data2 $neeraj --output_train train.tfrecord --output_test test.tfrecord
-    """
-}
-
-COMPUTE_MEAN = file("Src/ComputeMean.py")
-
-process MeanFile {
-        queue "gpu-cbio"
-	input:
-	set file(train), file(test) from RECORD
-	output:
-	set file(train), file(test), file("mean_file.npy") into TRAIN_TEST_MEAN
-	"""
-	python $COMPUTE_MEAN $train $test --output mean_file.npy
-	"""
 }
 
 DISTANCE_TRAIN = file("Src/UNetDistCust.py")
@@ -79,8 +57,8 @@ WEGIHT_DECAYS = [0.0005, 0.00005, 0.000005]
 NFEATURES = [16, 32, 64]
 
 process Training {
-        tag { "Training ${lr}__${wd}__${nf}" }
-        queue "gpu-cbio"
+    tag { "Training ${lr}__${wd}__${nf}" }
+    queue "gpu-cbio"
 	input:
 	set file(train), file(test), file(mean) from TRAIN_TEST_MEAN
 	each lr from LEARNING_RATE
@@ -89,7 +67,6 @@ process Training {
 	output:
 	file "${lr}__${wd}__${nf}" into LOGS
 	"""
-    export CUDA_VISIBLE_DEVICES=0
     source $HOME/init_gpu
 	python $DISTANCE_TRAIN --log ${lr}__${wd}__${nf} --learning_rate $lr --weight_decay $wd --n_features $nf --epochs $EPOCHS --batch_size $BS --train_record $train --test_record $test --mean_file $mean
 	"""
