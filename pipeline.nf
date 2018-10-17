@@ -68,7 +68,7 @@ process Training {
 	output:
 	file "${lr}__${wd}__${nf}" into LOGS
 	"""
-        source $HOME/init_gpu
+    source $HOME/init_gpu
 	python $DISTANCE_TRAIN --log ${lr}__${wd}__${nf} --learning_rate $lr --weight_decay $wd --n_features $nf --epochs $EPOCHS --batch_size $BS --train_record $train --test_record $test --mean_file $mean
 	"""
 }
