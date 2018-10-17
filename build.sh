@@ -1,1 +1,1 @@
-nextflow run pipeline.nf -profile local -resume
+nextflow run pipeline.nf -profile home  -resume
