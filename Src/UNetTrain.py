@@ -1,6 +1,6 @@
 
 from numpy import load
-from segmentation_net import DistanceUnet
+from segmentation_net import BatchNormedUnet
 
 def GetOptions():
     import argparse
@@ -43,7 +43,7 @@ def main():
 
     variables_model = {
         ## Model basics
-
+        "num_labels": 2,
         "image_size": (212, 212),
         "log": args.log, 
         "num_channels": 3,
@@ -53,7 +53,7 @@ def main():
         "n_features": args.n_features
     }
 
-    model = DistanceUnet(**variables_model)
+    model = BatchNormedUnet(**variables_model)
 
     variables_training = {
         ## training:
