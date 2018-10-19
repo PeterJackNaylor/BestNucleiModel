@@ -47,7 +47,7 @@ def main():
         "image_size": (212, 212),
         "log": args.log, 
         "num_channels": 3,
-        "tensorboard": False,
+        "tensorboard": True,
         "seed": None, 
         "verbose": 1,
         "n_features": args.n_features
@@ -70,7 +70,7 @@ def main():
         'save_weights' : True, # if to store as final weights the best thanks to early stopping
         'num_parallele_batch' : 8, # number batch to run in parallel (number of cpu usually)
         'restore' : False, # allows the model to be restored at training phase (or re-initialized)
-        'verbose' : 0
+        'verbose' : 2
     }
 
     _ = model.train(args.train_record, args.test_record, **variables_training)
