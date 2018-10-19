@@ -1,5 +1,5 @@
 
-TFRECORD = file('Src/Records.py')
+TFRECORD = file('Src/RecordsBinary.py')
 DATA1 = file('Data/TNBC_NucleiSegmentation')
 DATA2 = file('Data/ForDataGenTrainTestVal')
 
@@ -52,7 +52,7 @@ process Create_Record_Mean {
     """
 }
 
-DISTANCE_TRAIN = file("Src/UNetDistCust.py")
+BINARY_TRAIN = file("Src/UNetTrain.py")
 BS = 16
 EPOCHS = 80
 LEARNING_RATE = [0.001, 0.0001]
@@ -64,28 +64,28 @@ process Training {
     tag { "Training ${lr}__${wd}__${nf}" }
     clusterOptions "--gres=gpu:1"
     queue "gpu-cbio"
-	input:
-	set file(train), file(test), file(mean) from TRAIN_TEST_MEAN
-	each lr from LEARNING_RATE
-	each wd from WEGIHT_DECAYS
-	each nf from NFEATURES
-	output:
-	file "${lr}__${wd}__${nf}" into LOGS
-	"""
+    input:
+    set file(train), file(test), file(mean) from TRAIN_TEST_MEAN
+    each lr from LEARNING_RATE
+    each wd from WEGIHT_DECAYS
+    each nf from NFEATURES
+    output:
+    file "${lr}__${wd}__${nf}" into LOGS
+    """
     source $HOME/init_gpu
-	python $DISTANCE_TRAIN --log ${lr}__${wd}__${nf} --learning_rate $lr --weight_decay $wd \\
-                           --n_features $nf --epochs $EPOCHS --batch_size $BS --train_record $train \\
-                           --test_record $test --mean_file $mean
-	"""
+    python $BINARY_TRAIN --log ${lr}__${wd}__${nf} --learning_rate $lr --weight_decay $wd \\
+                         --n_features $nf --epochs $EPOCHS --batch_size $BS --train_record $train \\
+                         --test_record $test --mean_file $mean
+    """
 }
 
 FINAL_SCRIPT = file("Src/final_script.py")
 
 process GiveBest {
     if (params.normalize == 0){
-        publishDir "./best_model", copy:true, replace:true
+        publishDir "./unet_best_model", copy:true, replace:true
     } else {
-        publishDir "./best_model_normalized", copy:true, replace:true
+        publishDir "./unet_best_model_normalized", copy:true, replace:true
     }
     input:
     file _ from LOGS .collect()
