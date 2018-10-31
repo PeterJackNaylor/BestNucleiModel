@@ -1,4 +1,5 @@
 best*/
+*_best_model/
 # Nextflow files
 work/
 .nextflow*

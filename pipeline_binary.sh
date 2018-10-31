@@ -55,12 +55,12 @@ process Create_Record_Mean {
 BINARY_TRAIN = file("Src/UNetTrain.py")
 BS = 16
 EPOCHS = 80
-LEARNING_RATE = [0.001, 0.0001]
-WEGIHT_DECAYS = [0.0005, 0.00005, 0.000005]
-NFEATURES = [16, 32, 64]
+LEARNING_RATE = [0.001, 0.0001, 0.00001]
+WEGIHT_DECAYS = [5, 0.05, 0.0005, 0.000005]
+NFEATURES = [64]
 
 process Training {
-    memory '2GB'
+    memory '20GB'
     tag { "Training ${lr}__${wd}__${nf}" }
     clusterOptions "--gres=gpu:1"
     queue "gpu-cbio"
