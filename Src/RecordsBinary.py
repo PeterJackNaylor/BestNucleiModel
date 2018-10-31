@@ -6,8 +6,8 @@ import os
 import argparse
 from segmentation_net import create_tfrecord, compute_mean
 
-from datagen_object import DataGenNeerajBin
-from segmentation_net import ExampleUNetDatagen
+
+from datagen_object import DataGenNeerajBin, ExampleUNetDatagen
 
 
 
