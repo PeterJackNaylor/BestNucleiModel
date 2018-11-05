@@ -60,7 +60,7 @@ WEGIHT_DECAYS = [0.0005, 0.00005, 0.000005]
 NFEATURES = [16, 32, 64]
 
 process Training {
-    memory '2GB'
+    memory '15GB'
     tag { "Training ${lr}__${wd}__${nf}" }
     clusterOptions "--gres=gpu:1"
     queue "gpu-cbio"
