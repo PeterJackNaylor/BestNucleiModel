@@ -1,6 +1,7 @@
 
 
 from segmentation_net import ExampleUNetDatagen, ExampleDistDG
+from skimage.io import imread
 
 def return_range(inti):
     if inti == 0:
@@ -32,6 +33,15 @@ class DataGenNeerajBin(ExampleUNetDatagen):
         y_e += add2
 
         return image[x_b:x_e, y_b:y_e]
+
+class DataToyExample(ExampleUNetDatagen):
+    def load_mask(self, image_name):
+        """
+        Way of loading mask images
+        """
+        mask_name = image_name.replace('Slide', 'GT')
+        mask = imread(mask_name)
+        return mask
 
 
 class DataGenNeeraj(ExampleDistDG):

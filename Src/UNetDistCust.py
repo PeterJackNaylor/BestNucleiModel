@@ -27,7 +27,7 @@ def GetOptions():
     parser.add_argument('--weight_decay', required=True,
                         metavar="float", type=float,
                         help='Weight decay value to be applied')
-    parser.add_argument('--mean_file', required=True,
+    parser.add_argument('--mean_file', required=False,
                         metavar="/path/to/mean_file/",
                         help='Path to the mean file to use')
     parser.add_argument('--n_features', required=True,
@@ -47,7 +47,7 @@ def main():
         "image_size": (212, 212),
         "log": args.log, 
         "num_channels": 3,
-        "tensorboard": True,
+        "tensorboard": False,
         "seed": None, 
         "verbose": 1,
         "n_features": args.n_features
@@ -73,8 +73,7 @@ def main():
         'verbose' : 2
     }
 
-    _ = model.train(args.train_record, args.test_record, **variables_training)
-
+    _ = model.train(args.train_record, args.test_record,  **variables_training) #
     model.sess.close() 
 
 
