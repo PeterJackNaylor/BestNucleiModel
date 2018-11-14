@@ -62,8 +62,9 @@ NFEATURES = [16, 32, 64]
 process Training {
     memory '15GB'
     tag { "Training ${lr}__${wd}__${nf}" }
-    clusterOptions "--gres=gpu:1"
+    clusterOptions "--gres=gpu:1 --exclude=node[27]"
     queue "gpu-cbio"
+    maxForks 16
 	input:
 	set file(train), file(test), file(mean) from TRAIN_TEST_MEAN
 	each lr from LEARNING_RATE
