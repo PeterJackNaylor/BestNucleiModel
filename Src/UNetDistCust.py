@@ -47,7 +47,7 @@ def main():
         "image_size": (212, 212),
         "log": args.log, 
         "num_channels": 3,
-        "tensorboard": False,
+        "tensorboard": True,
         "seed": None, 
         "verbose": 1,
         "n_features": args.n_features
