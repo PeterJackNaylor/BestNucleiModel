@@ -1,6 +1,6 @@
 
 from numpy import load
-from segmentation_net import DistanceUnet
+from segmentation_net import DistanceUnet, PangNet
 
 def GetOptions():
     import argparse
@@ -47,12 +47,15 @@ def main():
         "image_size": (212, 212),
         "log": args.log, 
         "num_channels": 3,
-        "tensorboard": True,
+#        "num_labels": 2, #remove from distance
+        'mean_array': load(args.mean_file),
         "seed": None, 
-        "verbose": 2,
+        "verbose": 1,
+        "fake_batch": args.batch_size,
         "n_features": args.n_features
     }
 
+    # model = PangNet(**variables_model)
     model = DistanceUnet(**variables_model)
 
     variables_training = {
@@ -62,17 +65,18 @@ def main():
         'lr_procedure' : "10epoch", # the decay rate will be reduced every 5 epochs
         'weight_decay': args.weight_decay,
         'batch_size' : args.batch_size, # batch size for the
-        'decay_ema' : 0.9999, #
+        'decay_ema' : None, #0.9999, #
         'k' : 0.96, # exponential decay factor
-        'mean_array': load(args.mean_file),
         'n_epochs': args.epochs, # number of epochs
-        'early_stopping' : 10, # when to stop training, 20 epochs of non progression
+        'early_stopping' : 3, # when to stop training, 20 epochs of non progression
         'save_weights' : True, # if to store as final weights the best thanks to early stopping
         'num_parallele_batch' : 8, # number batch to run in parallel (number of cpu usually)
         'restore' : False, # allows the model to be restored at training phase (or re-initialized)
+        "tensorboard": True,
+        "track_variable": "f1_score"
     }
 
-    _ = model.train(args.train_record, args.test_record,  **variables_training) #
+    _ = model.train(args.train_record, args.test_record,  **variables_training) #,  **variables_training) #
     model.sess.close() 
 
 
