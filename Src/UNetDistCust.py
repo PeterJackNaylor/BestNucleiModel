@@ -1,6 +1,7 @@
 
 from numpy import load
 from segmentation_net import DistanceUnet, PangNet
+from tensorflow import uint8 as encoding
 
 def GetOptions():
     import argparse
@@ -47,22 +48,22 @@ def main():
         "image_size": (212, 212),
         "log": args.log, 
         "num_channels": 3,
-#        "num_labels": 2, #remove from distance
+       "num_labels": 2, #remove from distance
         'mean_array': load(args.mean_file),
         "seed": None, 
         "verbose": 1,
         "fake_batch": args.batch_size,
-        "n_features": args.n_features
+        # "n_features": args.n_features
     }
 
-    # model = PangNet(**variables_model)
-    model = DistanceUnet(**variables_model)
+    model = PangNet(**variables_model)
+    # model = DistanceUnet(**variables_model)
 
     variables_training = {
         ## training:
 
         'learning_rate' : args.learning_rate,
-        'lr_procedure' : "10epoch", # the decay rate will be reduced every 5 epochs
+        'lr_procedure' : "2epoch", # the decay rate will be reduced every 5 epochs
         'weight_decay': args.weight_decay,
         'batch_size' : args.batch_size, # batch size for the
         'decay_ema' : None, #0.9999, #
@@ -73,7 +74,8 @@ def main():
         'num_parallele_batch' : 8, # number batch to run in parallel (number of cpu usually)
         'restore' : False, # allows the model to be restored at training phase (or re-initialized)
         "tensorboard": True,
-        "track_variable": "f1_score"
+        "track_variable": "f1_score",
+        "decode" : encoding
     }
 
     _ = model.train(args.train_record, args.test_record,  **variables_training) #,  **variables_training) #
