@@ -73,7 +73,7 @@ def main():
         'save_weights' : True, # if to store as final weights the best thanks to early stopping
         'num_parallele_batch' : 8, # number batch to run in parallel (number of cpu usually)
         'restore' : False, # allows the model to be restored at training phase (or re-initialized)
-        "tensorboard": True,
+        "tensorboard": False,
         "track_variable": "f1_score",
         "decode" : encoding
     }
