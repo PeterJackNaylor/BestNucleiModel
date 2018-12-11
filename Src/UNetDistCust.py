@@ -52,7 +52,7 @@ def main():
         'mean_array': load(args.mean_file),
         "seed": None, 
         "verbose": 1,
-        # "fake_batch": args.batch_size,
+        "fake_batch": args.batch_size,
         "n_features": args.n_features
     }
 
