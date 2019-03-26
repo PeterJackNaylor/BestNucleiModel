@@ -6,7 +6,7 @@ import os
 import argparse
 from segmentation_net import create_tfrecord, compute_mean
 
-from datagen_object import DataGenNeeraj, DataToyExample
+from datagen_object import DataGenNeeraj, DataGenCPM
 from segmentation_net import ExampleDistDG
 
 
@@ -20,6 +20,9 @@ def ArgumentOptions():
     parser.add_argument('--data2', required=False,
                         metavar="/path/to/dataset2/",
                         help='Root directory of the dataset2')
+    parser.add_argument('--data3', required=False,
+                        metavar="/path/to/dataset3/",
+                        help='Root directory of the dataset3')
     parser.add_argument('--test', required=True,
                         metavar="/path/to/dataset_fortest/",
                         help='Root directory of the test set')
@@ -37,26 +40,32 @@ def ArgumentOptions():
 
 def main():
     args_ = ArgumentOptions()
-    if args_.data2 is None:
+    dg_train_list = []
+    if args_.data1 is not None:
         glob_data1 = os.path.join(args_.data1, "Slide_*", "*.png")
-        glob_test = os.path.join(args_.test, "Slide_*", "*.png")
-        dg1 = DataToyExample(glob_data1, verbose=True, cache=True)
-        dg_test = DataToyExample(glob_test, verbose=True, cache=True)
-        create_tfrecord(args_.output_train, [dg1])
-        create_tfrecord(args_.output_test, [dg_test])
-        compute_mean(args_.output_mean_array, [dg_test, dg1])
-
-    else:
-        glob_data1 = os.path.join(args_.data1, "Slide_*", "*.png")
-        glob_data2 = os.path.join(args_.data2, "Slide_*", "*.png")
-        glob_test = os.path.join(args_.test, "Slide_*", "*.png")
-        dg2 = DataGenNeeraj(glob_data2, crop=16, verbose=True, cache=True)  # --data2 $neeraj
         dg1 = ExampleDistDG(glob_data1, verbose=True, cache=True)
-        dg_test = ExampleDistDG(glob_test, verbose=True, cache=True)
+        dg_train_list.append(dg1)
 
-        create_tfrecord(args_.output_train, [dg1, dg2])
+    if args_.data2 is not None:
+        glob_data2 = os.path.join(args_.data2, "Slide_*", "*.png")
+        dg2 = DataGenNeeraj(glob_data2, crop=16, verbose=True, cache=True)  
+        dg_train_list.append(dg2)
+
+    if args_.data3 is not None:
+        glob_data3 = os.path.join(args_.data3, "Slide_*", "*.png")
+        dg3 = DataGenCPM(glob_data3, verbose=True, cache=True)
+        dg_train_list.append(dg3)
+
+    create_tfrecord(args_.output_train, dg_train_list)
+    compute_mean(args_.output_mean_array, dg_train_list)
+
+    
+    if args_.test is not None:
+        glob_test = os.path.join(args_.test, "Slide_*", "*.png")# --data2 $neeraj
+        dg_test = ExampleDistDG(glob_test, verbose=True, cache=True)
         create_tfrecord(args_.output_test, [dg_test])
-        compute_mean(args_.output_mean_array, [dg_test, dg1, dg2])
+
+
 
 if __name__ == '__main__':
     main()
