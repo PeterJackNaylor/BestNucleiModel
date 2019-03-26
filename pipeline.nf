@@ -41,6 +41,7 @@ if (params.normalize == 0){
 }
 
 process Create_Record_Mean {
+    publishDir "./dist_best_model", pattern:"mean_array.npy", copy:true, replace:true
     memory '5GB'
     queue "gpu-cbio"
     input:
@@ -61,6 +62,7 @@ process Create_Record_Mean {
 DISTANCE_TRAIN = file("Src/UNetDistCust.py")
 BS = 16
 EPOCHS = 80
+
 LEARNING_RATE = [0.01, 0.001, 0.0001, 0.00001]
 //LEARNING_RATE = [0.001, 0.0001]
 //WEGIHT_DECAYS = [5, 0.5, 0.05, 0.005, 0.0005, 0.00005, 0.000005, 0]
@@ -73,7 +75,7 @@ process Training {
     tag { "Training ${lr}__${wd}__${nf}" }
     clusterOptions "--gres=gpu:1"
     queue "gpu-cbio"
-    maxForks 16
+    maxForks 10
 	input:
 	set file(train), file(test), file(mean) from TRAIN_TEST_MEAN
 	each lr from LEARNING_RATE

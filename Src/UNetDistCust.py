@@ -69,7 +69,7 @@ def main():
         'decay_ema' : None, #0.9999, #
         'k' : 0.96, # exponential decay factor
         'n_epochs': args.epochs, # number of epochs
-        'early_stopping' : 3, # when to stop training, 20 epochs of non progression
+        'early_stopping' : 5, # when to stop training, 20 epochs of non progression
         'save_weights' : True, # if to store as final weights the best thanks to early stopping
         'num_parallele_batch' : 8, # number batch to run in parallel (number of cpu usually)
         'restore' : False, # allows the model to be restored at training phase (or re-initialized)
