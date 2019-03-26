@@ -13,3 +13,9 @@ rm -r ForDataGenTrainTestVal && \
 rm ForDataGenTrainTestVal.zip
 rm -r ../Data/ForDataGenTrainTestVal/Slide_test
 rm -r ../Data/ForDataGenTrainTestVal/GT_test
+
+wget http://members.cbio.mines-paristech.fr/~pnaylor/Downloads/DataCPM.zip && \
+unzip DataCPM.zip -d DataCPM && \
+mv DataCPM/DataCPM ../Data/ && \
+rm -r DataCPM && \
+rm DataCPM.zip
