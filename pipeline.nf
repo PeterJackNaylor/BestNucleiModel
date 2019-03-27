@@ -52,7 +52,6 @@ process Create_Record_Mean {
     output:
     set file("train.tfrecord"), file("test.tfrecord"), file("mean_array.npy") into TRAIN_TEST_MEAN
     """
-    module load cuda90
     python $TFRECORD --data1 $tnbc --data2 $neeraj --data3 $cpm --test $test \\
                      --output_train train.tfrecord --output_test test.tfrecord \\
                      --output_mean_array mean_array.npy
@@ -84,7 +83,6 @@ process Training {
 	output:
 	file "${lr}__${wd}__${nf}" into LOGS
 	"""
-    module load cuda90
 	python $DISTANCE_TRAIN --log ${lr}__${wd}__${nf} --learning_rate $lr --weight_decay $wd \\
                            --n_features $nf --epochs $EPOCHS --batch_size $BS --train_record $train \\
                            --test_record $test --mean_file $mean

@@ -75,6 +75,7 @@ def main():
         'restore' : False, # allows the model to be restored at training phase (or re-initialized)
         "tensorboard": False,
         "track_variable": "f1_score",
+        "track_training": False, # track test set
         "decode" : encoding
     }
 
