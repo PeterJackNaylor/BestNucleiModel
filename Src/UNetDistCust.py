@@ -63,17 +63,17 @@ def main():
         ## training:
 
         'learning_rate' : args.learning_rate,
-        'lr_procedure' : "15epoch", # the decay rate will be reduced every 5 epochs
+        'lr_procedure' : "20epoch", # the decay rate will be reduced every 5 epochs
         'weight_decay': args.weight_decay,
         'batch_size' : args.batch_size, # batch size for the
         'decay_ema' : None, #0.9999, #
         'k' : 0.96, # exponential decay factor
         'n_epochs': args.epochs, # number of epochs
-        'early_stopping' : 20, # when to stop training, 20 epochs of non progression
+        'early_stopping' : 40, # when to stop training, 20 epochs of non progression
         'save_weights' : True, # if to store as final weights the best thanks to early stopping
         'num_parallele_batch' : 8, # number batch to run in parallel (number of cpu usually)
         'restore' : False, # allows the model to be restored at training phase (or re-initialized)
-        "tensorboard": False,
+        "tensorboard": True,
         "track_variable": "f1_score",
         "track_training": False, # track test set
         "decode" : encoding
