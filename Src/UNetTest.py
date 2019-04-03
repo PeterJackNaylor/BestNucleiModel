@@ -38,13 +38,14 @@ def load_data(f):
     return rgb, label
 
 
-def test_model(folderpath, model):
+def test_model(folderpath, model, mean_array):
     scores = {"f1": []
               "acc": []}
     files = glob(os.path.join(folderpath, "Slide_*", "*.png"))
     
     for f in files:
         rgb, label = resize(load_data(f))
+        rgb = rgb.astype('float') - mean_array
         dic_res = model.predict(rgb, label=label)
         import pdb; pdb.set_trace()
 
@@ -65,9 +66,9 @@ def main():
     }
 
     model = DistanceUnet(**variables_model)
+    mean_array = load(args.mean_file)
 
-
-    res = test_model(args.test_folder, model)
+    res = test_model(args.test_folder, model, mean_array)
 
     model.sess.close() 
     import pdb; pdb.set_trace()
