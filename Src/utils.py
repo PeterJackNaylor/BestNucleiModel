@@ -82,7 +82,7 @@ def PostProcessOut(pred):
     hp = {'p1': 1, 'p2':0.5}
     pred[pred < 0] = 0.
     pred[pred > 255] = 255.
-    labeled_pic = post_process(pred, hp["p1"] * scale, hp["p2"] * scale)
+    labeled_pic = post_process(pred, hp["p1"], hp["p2"])
 
     borders_labeled_pic = generate_wsl(labeled_pic)
     min_size = 128
