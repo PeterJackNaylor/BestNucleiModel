@@ -38,14 +38,13 @@ def load_data(f):
     return rgb, label
 
 
-def test_model(folderpath, model, mean_array):
-    scores = {"f1": []
+def test_model(folderpath, model):
+    scores = {"f1": [],
               "acc": []}
     files = glob(os.path.join(folderpath, "Slide_*", "*.png"))
     
     for f in files:
         rgb, label = resize(load_data(f))
-        rgb = rgb.astype('float') - mean_array
         dic_res = model.predict(rgb, label=label)
         import pdb; pdb.set_trace()
 
@@ -55,20 +54,21 @@ def main():
 
     variables_model = {
         ## Model basics
-        "num_labels": 2,
+
         "image_size": (212, 212),
-        "log": args.model, 
+        "log": args.log, 
         "num_channels": 3,
-        "tensorboard": False,
+        # "num_labels": 2, #remove from distance
+        'mean_array': load(args.mean_file),
         "seed": None, 
         "verbose": 1,
+        "fake_batch": 1,
         "n_features": args.features
     }
 
     model = DistanceUnet(**variables_model)
-    mean_array = load(args.mean_file)
 
-    res = test_model(args.test_folder, model, mean_array)
+    res = test_model(args.test_folder, model)
 
     model.sess.close() 
     import pdb; pdb.set_trace()
