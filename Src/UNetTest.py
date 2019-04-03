@@ -28,13 +28,13 @@ def GetOptions():
 
 def resize(tup):
     rgb, lbl = tup 
-    rgb = expend(rgb[0:504, 0:504,0:2], 92, 92)
-    lbl = lbl[0:504, 0:504]
+    rgb = expend(rgb[0:500, 0:500,0:3], 92, 92)
+    lbl = lbl[0:500, 0:500]
     return rgb, lbl
 
 def load_data(f):
     rgb = imread(f)
-    label = imread(rgb.replace("Slide", "GT"))
+    label = imread(f.replace("Slide", "GT"))
     return rgb, label
 
 
