@@ -60,10 +60,10 @@ def main():
         ## Model basics
 
         "image_size": (212, 212),
-        "log": args.log, 
+        "log": args.model, 
         "num_channels": 3,
         # "num_labels": 2, #remove from distance
-        'mean_array': load(args.mean_file),
+        'mean_array': load(args.mean_array),
         "seed": None, 
         "verbose": 1,
         "fake_batch": 1,
