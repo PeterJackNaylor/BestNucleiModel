@@ -1,7 +1,11 @@
 
+import os
+from glob import glob
+from skimage.io import imread
+import skimage.measure as meas
 from numpy import load
 from segmentation_net import DistanceUnet
-from utils import expend, 
+from utils import expend, PostProcessOut
 
 def GetOptions():
     import argparse
@@ -21,10 +25,6 @@ def GetOptions():
                         help='path to the test folder')
     args = parser.parse_args()
     return args
-import os
-from glob import glob
-from skimage.io import imread
-import skimage.measure as meas
 
 def resize(tup):
     rgb, lbl = tup 
@@ -49,7 +49,7 @@ def test_model(folderpath, model):
         f1 = dic_res['f1_score']
         label_int = PostProcessOut(dic_res['probability'])
         label = meas.label(label)
-        
+
         import pdb; pdb.set_trace()
 
 def main():
