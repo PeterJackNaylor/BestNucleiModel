@@ -1,7 +1,7 @@
 
 from numpy import load
 from segmentation_net import DistanceUnet
-from utils import expend
+from utils import expend, 
 
 def GetOptions():
     import argparse
@@ -23,29 +23,33 @@ def GetOptions():
     return args
 import os
 from glob import glob
-from skimage.io import imload
-
+from skimage.io import imread
+import skimage.measure as meas
 
 def resize(tup):
     rgb, lbl = tup 
-    rgb = expend(rgb[0:504], 92, 92)
-    lbl = lbl[0:504]
+    rgb = expend(rgb[0:504, 0:504,0:2], 92, 92)
+    lbl = lbl[0:504, 0:504]
     return rgb, lbl
 
 def load_data(f):
-    rgb = imload(rgb)
-    label = imload(rgb.replace("Slide", "GT"))
+    rgb = imread(f)
+    label = imread(rgb.replace("Slide", "GT"))
     return rgb, label
 
 
 def test_model(folderpath, model):
     scores = {"f1": [],
-              "acc": []}
+              "aji": []}
     files = glob(os.path.join(folderpath, "Slide_*", "*.png"))
     
     for f in files:
         rgb, label = resize(load_data(f))
         dic_res = model.predict(rgb, label=label)
+        f1 = dic_res['f1_score']
+        label_int = PostProcessOut(dic_res['probability'])
+        label = meas.label(label)
+        
         import pdb; pdb.set_trace()
 
 def main():

@@ -1,8 +1,14 @@
 
 import os
+import numpy as np
 from operator import add
 
-import numpy as np
+from scipy.ndimage import binary_fill_holes
+
+from dynamic_watershed.dynamic_watershed import post_process, generate_wsl
+from skimage.morphology import remove_small_objects
+import skimage.measure as meas
+
 
 def check_or_create(path):
     """
@@ -66,3 +72,24 @@ def expend(image, x_s, y_s):
         enlarged_image[rows:(y_s + rows), (x_s + cols):(2*x_s + cols)])
     enlarged_image = enlarged_image.astype('uint8')
     return enlarged_image
+
+def fill_holes(image):
+    rec = binary_fill_holes(image)
+    return rec
+
+
+def PostProcessOut(pred):
+    hp = {'p1': 1, 'p2':0.5}
+    pred[pred < 0] = 0.
+    pred[pred > 255] = 255.
+    labeled_pic = post_process(pred, hp["p1"] * scale, hp["p2"] * scale)
+
+    borders_labeled_pic = generate_wsl(labeled_pic)
+    min_size = 128
+    labeled_pic = remove_small_objects(labeled_pic, min_size=min_size)
+    labeled_pic[labeled_pic > 0] = 255
+    labeled_pic[borders_labeled_pic > 0] = 0
+    labeled_pic = fill_holes(labeled_pic)
+    labeled_pic = meas.label(labeled_pic)
+    return labeled_pic
+
