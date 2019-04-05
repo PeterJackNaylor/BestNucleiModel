@@ -5,6 +5,7 @@ from skimage.io import imread, imsave
 import skimage.measure as meas
 from numpy import load
 from segmentation_net import DistanceUnet
+from tqdm import tqdm
 from utils import expend, PostProcessOut, AJI_fast, check_or_create, random_colors, apply_mask_with_highlighted_borders
 def GetOptions():
     import argparse
@@ -46,7 +47,7 @@ def test_model(folderpath, model, output):
     files = glob(os.path.join(folderpath, "Slide_*", "*.png"))
     check_or_create(output)
     num = 0
-    for f in files:
+    for f in tqdm(files):
         rgb, label = resize(load_data(f))
         dic_res = model.predict(rgb, label=label)
         label = meas.label(label)
@@ -58,7 +59,6 @@ def test_model(folderpath, model, output):
         scores["f1"].append(f1)
         scores["aji"].append(aji)
         colors = random_colors(255)
-        import pdb; pdb.set_trace()
         output_gt = apply_mask_with_highlighted_borders(rgb[92:-92, 92:-92], label, colors, alpha=0.5)
         output_pred = apply_mask_with_highlighted_borders(rgb[92:-92, 92:-92], label_int, colors, alpha=0.5)
         num += 1
