@@ -1,12 +1,11 @@
 
 import os
 from glob import glob
-from skimage.io import imread
+from skimage.io import imread, imsave
 import skimage.measure as meas
 from numpy import load
 from segmentation_net import DistanceUnet
-from utils import expend, PostProcessOut
-
+from utils import expend, PostProcessOut, AJI_fast, check_or_create
 def GetOptions():
     import argparse
     parser = argparse.ArgumentParser(
@@ -23,6 +22,9 @@ def GetOptions():
     parser.add_argument('--test_folder', required=True,
                         metavar="float", type=str,
                         help='path to the test folder')
+    parser.add_argument('--output_path', required=True,
+                        metavar="float", type=str,
+                        help='output')
     args = parser.parse_args()
     return args
 
@@ -38,20 +40,30 @@ def load_data(f):
     return rgb, label
 
 
-def test_model(folderpath, model):
+def test_model(folderpath, model, output):
     scores = {"f1": [],
               "aji": []}
     files = glob(os.path.join(folderpath, "Slide_*", "*.png"))
-    
+    check_or_create(output)
+    num = 0
     for f in files:
         rgb, label = resize(load_data(f))
         dic_res = model.predict(rgb, label=label)
-        f1 = dic_res['f1_score']
-        label_int = PostProcessOut(dic_res['probability'][:,:,0])
         label = meas.label(label)
 
-        import pdb; pdb.set_trace()
+        f1 = dic_res['f1_score']
+        label_int = PostProcessOut(dic_res['probability'][:,:,0])
+        aji = AJI_fast(label, label_int)
 
+        import pdb; pdb.set_trace()
+        scores["f1"].append(f1)
+        scores["aji"].append(aji)
+        colors = random_colors(255)
+        output_gt = apply_mask_with_highlighted_borders(rgb, label, color, alpha=0.5)
+        output = apply_mask_with_highlighted_borders(rgb, label_int, color, alpha=0.5)
+        num += 1
+        imsave(os.path.join(output, "test_{}_gt.png"), output_gt)
+        imsave(os.path.join(output, "test_{}_pred.png"), output)
 def main():
 
     args = GetOptions()

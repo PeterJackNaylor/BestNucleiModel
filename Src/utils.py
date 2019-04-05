@@ -8,7 +8,10 @@ from scipy.ndimage import binary_fill_holes
 from dynamic_watershed.dynamic_watershed import post_process, generate_wsl
 from skimage.morphology import remove_small_objects
 import skimage.measure as meas
-
+from sklearn.metrics import confusion_matrix
+from skimage import img_as_ubyte
+from skimage.segmentation import find_boundaries, mark_boundaries
+from skimage.color import hsv2rgb, label2rgb
 
 def check_or_create(path):
     """
@@ -93,3 +96,84 @@ def PostProcessOut(pred):
     labeled_pic = meas.label(labeled_pic)
     return labeled_pic
 
+
+def AJI_fast(G, S):
+    """
+    AJI as described in the paper, but a much faster implementation.
+    """
+    G = meas.label(G, background=0)
+    S = meas.label(S, background=0)
+    if S.sum() == 0:
+        return 0.
+    C = 0
+    U = 0 
+    USED = np.zeros(S.max())
+
+    G_flat = G.flatten()
+    S_flat = S.flatten()
+    G_max = np.max(G_flat)
+    S_max = np.max(S_flat)
+    m_labels = max(G_max, S_max) + 1
+    cm = confusion_matrix(G_flat, S_flat, labels=range(m_labels)).astype(np.float)
+    LIGNE_J = np.zeros(S_max)
+    for j in range(1, S_max + 1):
+        LIGNE_J[j - 1] = cm[:, j].sum()
+
+    for i in range(1, G_max + 1):
+        LIGNE_I_sum = cm[i, :].sum()
+        def h(indice):
+            LIGNE_J_sum = LIGNE_J[indice - 1]
+            inter = cm[i, indice]
+
+            union = LIGNE_I_sum + LIGNE_J_sum - inter
+            return inter / union
+        
+        JI_ligne = map(h, range(1, S_max + 1))
+        best_indice = np.argmax(JI_ligne) + 1
+        C += cm[i, best_indice]
+        U += LIGNE_J[best_indice - 1] + LIGNE_I_sum - cm[i, best_indice]
+        USED[best_indice - 1] = 1
+
+    U_sum = ((1 - USED) * LIGNE_J).sum()
+    U += U_sum
+    return float(C) / float(U) 
+
+def inv_f(pix):
+    return np.squeeze(pix)
+
+def random_colors(N, bright=True):
+    """
+    Generate random colors.
+    To get visually distinct colors, generate them in HSV space then
+    convert to RGB.
+    """
+    brightness = 1.0 if bright else 0.7
+    hsv = [(float(i) / N, 1 , brightness) for i in range(N)]
+    colors = list(map(lambda c: inv_f(hsv2rgb(f(c))), hsv))
+    np.random.shuffle(colors)
+    colors = np.array(colors)
+    n, p = colors.shape
+    new_colors = np.zeros(shape=(n+1, p))
+    new_colors[1:, :] = colors
+    return new_colors
+    
+def add_contours(image, label, color = (0, 1, 0)):
+    
+    # mask = find_boundaries(label)
+    # res = np.array(image).copy()
+    # res[mask] = np.array([0, 255, 0])
+    res = mark_boundaries(image, label, color=color)
+    res = img_as_ubyte(res)
+    return res
+
+def apply_mask_with_highlighted_borders(image, labeled, color, alpha=0.5):
+    """Apply the given mask to the image.
+    """
+    for i in range(1, labeled.max() + 1):
+        for c in range(3):
+            image = add_contours(image, labeled == i, color = col[i])
+            image[:, :, c] = np.where(labeled == i,
+                                      image[:, :, c] *
+                                      (1 - alpha) + alpha * color[i, c] * 255,
+                                      image[:, :, c])
+    return image
