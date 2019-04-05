@@ -59,11 +59,11 @@ def test_model(folderpath, model, output):
         scores["aji"].append(aji)
         colors = random_colors(255)
         import pdb; pdb.set_trace()
-        output_gt = apply_mask_with_highlighted_borders(rgb, label, colors, alpha=0.5)
-        output = apply_mask_with_highlighted_borders(rgb, label_int, color, alpha=0.5)
+        output_gt = apply_mask_with_highlighted_borders(rgb[92:-92, 92:-92], label, colors, alpha=0.5)
+        output_pred = apply_mask_with_highlighted_borders(rgb[92:-92, 92:-92], label_int, color, alpha=0.5)
         num += 1
         imsave(os.path.join(output, "test_{}_gt.png"), output_gt)
-        imsave(os.path.join(output, "test_{}_pred.png"), output)
+        imsave(os.path.join(output, "test_{}_pred.png"), output_pred)
 def main():
 
     args = GetOptions()
