@@ -84,7 +84,7 @@ def main():
 
     model = DistanceUnet(**variables_model)
 
-    res = test_model(args.test_folder, model, options.output_path)
+    res = test_model(args.test_folder, model, args.output_path)
 
     model.sess.close() 
     import pdb; pdb.set_trace()
