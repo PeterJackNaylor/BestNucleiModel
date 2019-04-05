@@ -5,7 +5,7 @@ from skimage.io import imread, imsave
 import skimage.measure as meas
 from numpy import load
 from segmentation_net import DistanceUnet
-from utils import expend, PostProcessOut, AJI_fast, check_or_create
+from utils import expend, PostProcessOut, AJI_fast, check_or_create, random_colors, apply_mask_with_highlighted_borders
 def GetOptions():
     import argparse
     parser = argparse.ArgumentParser(
@@ -55,10 +55,10 @@ def test_model(folderpath, model, output):
         label_int = PostProcessOut(dic_res['probability'][:,:,0])
         aji = AJI_fast(label, label_int)
 
-        import pdb; pdb.set_trace()
         scores["f1"].append(f1)
         scores["aji"].append(aji)
         colors = random_colors(255)
+        import pdb; pdb.set_trace()
         output_gt = apply_mask_with_highlighted_borders(rgb, label, color, alpha=0.5)
         output = apply_mask_with_highlighted_borders(rgb, label_int, color, alpha=0.5)
         num += 1

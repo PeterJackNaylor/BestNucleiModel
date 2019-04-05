@@ -137,6 +137,9 @@ def AJI_fast(G, S):
     U_sum = ((1 - USED) * LIGNE_J).sum()
     U += U_sum
     return float(C) / float(U) 
+    
+def f(tup):
+    return np.expand_dims(np.expand_dims(np.array(tup, dtype='float'),0), 0)
 
 def inv_f(pix):
     return np.squeeze(pix)
@@ -156,7 +159,7 @@ def random_colors(N, bright=True):
     new_colors = np.zeros(shape=(n+1, p))
     new_colors[1:, :] = colors
     return new_colors
-    
+
 def add_contours(image, label, color = (0, 1, 0)):
     
     # mask = find_boundaries(label)
