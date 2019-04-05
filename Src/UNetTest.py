@@ -47,7 +47,7 @@ def test_model(folderpath, model):
         rgb, label = resize(load_data(f))
         dic_res = model.predict(rgb, label=label)
         f1 = dic_res['f1_score']
-        label_int = PostProcessOut(dic_res['probability'])
+        label_int = PostProcessOut(dic_res['probability'][:,:,0])
         label = meas.label(label)
 
         import pdb; pdb.set_trace()
