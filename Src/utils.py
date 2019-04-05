@@ -137,7 +137,7 @@ def AJI_fast(G, S):
     U_sum = ((1 - USED) * LIGNE_J).sum()
     U += U_sum
     return float(C) / float(U) 
-    
+
 def f(tup):
     return np.expand_dims(np.expand_dims(np.array(tup, dtype='float'),0), 0)
 
@@ -174,7 +174,7 @@ def apply_mask_with_highlighted_borders(image, labeled, color, alpha=0.5):
     """
     for i in range(1, labeled.max() + 1):
         for c in range(3):
-            image = add_contours(image, labeled == i, color = col[i])
+            image = add_contours(image, labeled == i, color = color[i])
             image[:, :, c] = np.where(labeled == i,
                                       image[:, :, c] *
                                       (1 - alpha) + alpha * color[i, c] * 255,
