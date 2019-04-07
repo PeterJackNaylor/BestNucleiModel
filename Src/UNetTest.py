@@ -43,8 +43,8 @@ def load_data(f):
 
 
 def test_model(folderpath, model, output):
-    scores = {"f1": [],
-              "aji": []}
+    scores = {"f1_breast": [], "f1_brain": [],
+              "aji_breast": [], "aji_brain": []}
     files = glob(os.path.join(folderpath, "Slide_*", "*.png"))
     check_or_create(output)
     num = 0
@@ -57,16 +57,25 @@ def test_model(folderpath, model, output):
         label_int = PostProcessOut(dic_res['probability'][:,:,0])
         aji = AJI_fast(label, label_int)
 
-        scores["f1"].append(f1)
-        scores["aji"].append(aji)
+        n_pat = f.split('/')[-1].split('_')[0]
+        if n_path in ["02", "06"]:
+            f1_name = "f1_breast"
+            aji_name = "aji_breast"
+        else:
+            f1_name = "f1_brain"
+            aji_name = "aji_brain"
+        scores[f1_name].append(f1)
+        scores[aji_name].append(aji)
         colors = random_colors(255)
         output_gt = apply_mask_with_highlighted_borders(rgb[92:-92, 92:-92], label, colors, alpha=0.5)
         output_pred = apply_mask_with_highlighted_borders(rgb[92:-92, 92:-92], label_int, colors, alpha=0.5)
         num += 1
         imsave(os.path.join(output, "test_{}_gt.png".format(num)), output_gt)
         imsave(os.path.join(output, "test_{}_pred.png".format(num)), output_pred)
-    print("mean f1: {}".format(np.mean(scores["f1"])))
-    print("mean aji: {}".format(np.mean(scores["aji"])))
+    print("mean f1 brain: {}".format(np.mean(scores["f1_brain"])))
+    print("mean aji brain: {}".format(np.mean(scores["aji_brain"])))
+    print("mean f1 breast: {}".format(np.mean(scores["f1_breast"])))
+    print("mean aji breast: {}".format(np.mean(scores["aji_breast"])))
 def main():
 
     args = GetOptions()

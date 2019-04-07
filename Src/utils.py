@@ -128,7 +128,7 @@ def AJI_fast(G, S):
             union = LIGNE_I_sum + LIGNE_J_sum - inter
             return inter / union
         
-        JI_ligne = map(h, range(1, S_max + 1))
+        JI_ligne = list(map(h, range(1, S_max + 1)))
         best_indice = np.argmax(JI_ligne) + 1
         C += cm[i, best_indice]
         U += LIGNE_J[best_indice - 1] + LIGNE_I_sum - cm[i, best_indice]
