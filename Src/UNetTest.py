@@ -58,7 +58,7 @@ def test_model(folderpath, model, output):
         aji = AJI_fast(label, label_int)
 
         n_pat = f.split('/')[-1].split('_')[0]
-        if n_path in ["02", "06"]:
+        if n_pat in ["02", "06"]:
             f1_name = "f1_breast"
             aji_name = "aji_breast"
         else:
